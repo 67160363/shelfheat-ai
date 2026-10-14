@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ShelfHeat AI | Storytelling Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{--blue:#1A365D;--blue2:#27508a;--orange:#FF6B35;--bg:#F3F6FA;--ink:#14213a;--mute:#5d6b82;--line:#dbe3ee}
+*{box-sizing:border-box;margin:0}
+body{font-family:"IBM Plex Sans Thai",system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+header{background:var(--blue);color:#fff;padding:40px 24px 64px}
+.wrap{max-width:1100px;margin:0 auto}
+header h1{font-size:clamp(26px,4vw,40px);line-height:1.2}
+header h1 span{color:var(--orange)}
+header p{max-width:62ch;margin-top:10px;color:#c9d6ea}
+main{max-width:1100px;margin:-40px auto 48px;padding:0 24px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px}
+.kpi b{display:block;font-size:30px;color:var(--blue)}
+.kpi small{color:var(--mute)}
+.kpi.hot b{color:var(--orange)}
+section{margin-top:40px}
+section h2{font-size:22px;color:var(--blue)}
+.tag{display:inline-block;background:var(--orange);color:#fff;border-radius:99px;padding:2px 12px;font-size:13px;font-weight:700;margin-bottom:6px}
+.tag.b{background:var(--blue)}
+.story{display:grid;grid-template-columns:1.5fr 1fr;gap:16px;margin-top:14px}
+.chart{position:relative;height:320px}
+.note p+p{margin-top:10px}
+.note{border-left:5px solid var(--orange)}
+.note.b{border-left-color:var(--blue)}
+table{width:100%;border-collapse:collapse;font-size:14px;margin-top:12px}
+th,td{padding:9px 10px;text-align:right;border-bottom:1px solid var(--line)}
+th:nth-child(-n+3),td:nth-child(-n+3){text-align:left}
+th{color:var(--mute);font-weight:500}
+.act li{margin:6px 0 0 18px}
+footer{text-align:center;color:var(--mute);font-size:13px;padding:0 24px 32px}
+@media(max-width:800px){.story{grid-template-columns:1fr}.tbl{overflow-x:auto}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+<h1>ShelfHeat <span>AI</span>: สายตาไม่เท่ากับยอดขาย</h1>
+<p>Heatmap บอกว่าลูกค้าสนใจสินค้าไหน แต่ข้อมูลยอดขายบอกว่าใครยอมจ่ายจริง ดูทั้งสองอย่างพร้อมกันเพื่อตัดสินใจจัดชั้นวางให้ถูกจุด</p>
+</div></header>
+<main>
+<div class="kpis" id="kpis"></div>
+
+<section>
+<span class="tag">Story 1</span>
+<h2>Look but Don't Buy: คนจ้อง แต่ไม่หยิบ</h2>
+<div class="story">
+<div class="card"><div class="chart"><canvas id="c1"></canvas></div></div>
+<div class="card note"><p><b>SKU-002 (Premium Snack)</b> ถูกจับตามองถึง 920 ครั้ง แต่ขายได้เพียง 92 ชิ้น (Conversion 10%)</p>
+<p><b>SKU-006 (Imported Candy)</b> ที่ Promo Endcap มี 800 ครั้ง แต่ขายได้ 40 ชิ้น (Conversion 5%)</p>
+<p>แพ็กเกจดึงดูดสายตาได้แล้ว คอขวดน่าจะอยู่ที่ราคาหรือโปรโมชัน ทั้งสองตัวมีราคาต่อชิ้นสูงสุดในกลุ่ม (ประมาณ 100 บาท)</p></div>
+</div></section>
+
+<section>
+<span class="tag b">Story 2</span>
+<h2>Grab &amp; Go: ไม่ต้องยืนดู แต่ตั้งใจมาซื้อ</h2>
+<div class="story">
+<div class="card"><div class="chart"><canvas id="c2"></canvas></div></div>
+<div class="card note b"><p><b>SKU-003 (Beverage)</b> อยู่ชั้นล่างสุด มีคนสนใจเพียง 300 ครั้ง แต่ปิดการขายได้ 250 ชิ้น (Conversion 83.3% สูงสุด)</p>
+<p>เป็นสินค้าจำเป็นที่ลูกค้าตั้งใจมาหา จึงไม่ต้องแย่งพื้นที่ Eye-Level ปล่อยไว้ชั้นล่างได้ แล้วใช้โซนสายตาให้สินค้าที่ต้องการดึงดูดแทน</p></div>
+</div></section>
+
+<section>
+<h2>ข้อมูลรายสินค้า</h2>
+<div class="card tbl"><table id="tbl"></table></div>
+</section>
+
+<section>
+<h2>ข้อเสนอแนะเชิงธุรกิจ</h2>
+<div class="card"><ul class="act">
+<li><b>SKU-002, SKU-006:</b> ทดลองทำ A/B Test เรื่องโปรโมชัน (เช่น ซื้อ 2 ลด 15%) หรือป้ายราคาที่ชัดขึ้น แล้วให้ ShelfHeat AI วัด Conversion หลังปรับ</li>
+<li><b>SKU-003:</b> คงตำแหน่งชั้นล่างไว้ และใช้พื้นที่ Eye-Level ที่ว่างให้สินค้าที่ Conversion สูงแต่ Interaction ยังต่ำ</li>
+<li><b>SKU-004 และ SKU-005:</b> เป็นสินค้าที่ทั้งสนใจและขายดี ควรรักษาตำแหน่งและสต็อกให้พอ</li>
+</ul></div>
+</section>
+</main>
+<footer>ข้อมูลในหน้านี้เป็น Mock Data เพื่อการเรียนการสอนวิชา BPAIC | Week 11 Mini Project</footer>
+
+<script>
+const D=[
+{id:"SKU-001",cat:"Snack",zone:"Zone A (Eye-Level)",i:850,s:340,r:10200},
+{id:"SKU-002",cat:"Premium Snack",zone:"Zone A (Eye-Level)",i:920,s:92,r:9200},
+{id:"SKU-003",cat:"Beverage",zone:"Zone B (Bottom)",i:300,s:250,r:5000},
+{id:"SKU-004",cat:"Energy Drink",zone:"Zone C (Promo Endcap)",i:1200,s:600,r:15000},
+{id:"SKU-005",cat:"Bakery",zone:"Zone A (Eye-Level)",i:450,s:300,r:12000},
+{id:"SKU-006",cat:"Imported Candy",zone:"Zone C (Promo Endcap)",i:800,s:40,r:4000}];
+D.forEach(d=>d.cv=d.s/d.i*100);
+const B="#1A365D",O="#FF6B35",G="#c3cfe0",fmt=n=>n.toLocaleString("en-US");
+const sum=k=>D.reduce((a,d)=>a+d[k],0);
+document.getElementById("kpis").innerHTML=[
+["Interaction รวม",fmt(sum("i")),"ครั้งที่ AI ตรวจจับ",""],
+["ยอดขายรวม",fmt(sum("s"))+" ชิ้น","จาก 6 SKU",""],
+["Conversion เฉลี่ย",(sum("s")/sum("i")*100).toFixed(1)+"%","ยอดขาย ÷ Interaction",""],
+["รายได้รวม","฿"+fmt(sum("r")),"SKU-002 และ SKU-006 รวมกันขาดไปมาก","hot"]
+].map(k=>`<div class="card kpi ${k[3]}"><small>${k[0]}</small><b>${k[1]}</b><small>${k[2]}</small></div>`).join("");
+
+Chart.defaults.font.family='"IBM Plex Sans Thai",sans-serif';
+const opt=(extra={})=>({responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"bottom"}},...extra});
+const hi1=["SKU-002","SKU-006"];
+new Chart(c1,{type:"bar",data:{labels:D.map(d=>d.id),datasets:[
+{label:"AI Interaction",data:D.map(d=>d.i),backgroundColor:B},
+{label:"Actual Sales",data:D.map(d=>d.s),backgroundColor:D.map(d=>hi1.includes(d.id)?O:G)}]},
+options:opt({scales:{y:{title:{display:true,text:"จำนวนครั้ง / ชิ้น"}}}})});
+
+const hi2="SKU-003";
+new Chart(c2,{type:"bar",data:{labels:D.map(d=>d.id),datasets:[
+{label:"Conversion Rate (%)",data:D.map(d=>+d.cv.toFixed(1)),backgroundColor:D.map(d=>d.id===hi2?O:G)}]},
+options:opt({indexAxis:"y",plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.raw+"%"}}},scales:{x:{max:100,title:{display:true,text:"Conversion Rate (%)"}}}})});
+
+const mx=Math.max(...D.map(d=>d.i));
+document.getElementById("tbl").innerHTML="<tr><th>SKU</th><th>หมวด</th><th>โซน</th><th>Interaction</th><th>ยอดขาย</th><th>Conv.</th><th>รายได้ (฿)</th></tr>"+
+D.map(d=>`<tr><td>${d.id}</td><td>${d.cat}</td><td>${d.zone}</td><td style="background:rgba(255,107,53,${(d.i/mx*.45).toFixed(2)})">${fmt(d.i)}</td><td>${d.s}</td><td>${d.cv.toFixed(1)}%</td><td>${fmt(d.r)}</td></tr>`).join("");
+</script>
+</body>
+</html>

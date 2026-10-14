@@ -1,0 +1,7 @@
+Product_ID,Category,Shelf_Zone,AI_Interaction_Count,Actual_Sales,Conversion_Rate,Revenue_THB
+SKU-001,Snack,Zone A (Eye-Level),850,340,40.0,10200
+SKU-002,Premium Snack,Zone A (Eye-Level),920,92,10.0,9200
+SKU-003,Beverage,Zone B (Bottom),300,250,83.3,5000
+SKU-004,Energy Drink,Zone C (Promo Endcap),1200,600,50.0,15000
+SKU-005,Bakery,Zone A (Eye-Level),450,300,66.7,12000
+SKU-006,Imported Candy,Zone C (Promo Endcap),800,40,5.0,4000
