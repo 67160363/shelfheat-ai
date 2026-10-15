@@ -23,7 +23,7 @@ from pathlib import Path
 
 import cv2
 import numpy as np
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from ultralytics import YOLO
@@ -434,6 +434,16 @@ app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 # --------------------------------------------------------------------------
 # Routes
 # --------------------------------------------------------------------------
+def local_only(request: Request):
+    """Block control endpoints for requests that came through the tunnel.
+
+    cloudflared connects from 127.0.0.1, so the client IP is useless here; instead
+    any proxy header marks the request as remote (view-only).
+    """
+    if "cf-connecting-ip" in request.headers or "x-forwarded-for" in request.headers:
+        raise HTTPException(status_code=403, detail="View-only: controls are disabled on shared links")
+
+
 @app.get("/")
 def dashboard():
     return FileResponse(BASE_DIR / "static" / "index.html")
@@ -467,19 +477,19 @@ def stats_mock():
     return {"total_visitors": 120, "top_aisle": "Beverages", "avg_dwell_seconds": 94}
 
 
-@app.post("/api/reset")
+@app.post("/api/reset", dependencies=[Depends(local_only)])
 def reset():
     engine.reset()
     return {"ok": True}
 
 
-@app.post("/api/toggle-privacy")
+@app.post("/api/toggle-privacy", dependencies=[Depends(local_only)])
 def toggle_privacy():
     """Turn head pixelation on/off in the live stream."""
     return {"privacy": engine.toggle_privacy()}
 
 
-@app.post("/api/toggle-heatmap")
+@app.post("/api/toggle-heatmap", dependencies=[Depends(local_only)])
 def toggle_heatmap():
     """Turn the heatmap overlay on/off in the live stream (analytics keep running)."""
     return {"heatmap": engine.toggle_heatmap()}

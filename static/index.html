@@ -646,23 +646,29 @@
     }
   }
 
+  // controls are refused (403) on the shared tunnel link: say so, leave state as-is
+  const VIEW_ONLY = "View-only: controls are disabled on this shared link.";
+
   $("privacyBtn").addEventListener("click", async () => {
     try {
-      const d = await (await fetch("/api/toggle-privacy", { method: "POST" })).json();
-      setPrivacy(d.privacy);
+      const r = await fetch("/api/toggle-privacy", { method: "POST" });
+      if (r.status === 403) return toast(VIEW_ONLY);
+      setPrivacy((await r.json()).privacy);
     } catch (e) { setStatus("err", "Server offline"); }
   });
 
   $("heatmapBtn").addEventListener("click", async () => {
     try {
-      const d = await (await fetch("/api/toggle-heatmap", { method: "POST" })).json();
-      setHeatmap(d.heatmap);
+      const r = await fetch("/api/toggle-heatmap", { method: "POST" });
+      if (r.status === 403) return toast(VIEW_ONLY);
+      setHeatmap((await r.json()).heatmap);
     } catch (e) { setStatus("err", "Server offline"); }
   });
 
   $("resetBtn").addEventListener("click", async () => {
     try {
       const r = await fetch("/api/reset", { method: "POST" });
+      if (r.status === 403) return toast(VIEW_ONLY);
       if (!r.ok) throw new Error(r.status);
       hist.visitors.length = 0;
       hist.dwell.length = 0;
